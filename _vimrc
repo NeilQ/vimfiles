@@ -22,6 +22,7 @@ else
     let g:isGUI = 0
 endif
 
+let g:airline#extensions#tabline#enaled=1
 
 " =============================================================================
 "                          << 以下为软件默认配置 >>
@@ -116,7 +117,6 @@ endif
 
 set nocompatible                                      "禁用 Vi 兼容模式
 "filetype off                                          "禁用文件类型侦测
-
 if g:islinux
     set rtp+=~/.vim/bundle/vundle/
     call vundle#rc()
@@ -132,7 +132,7 @@ Bundle 'gmarik/vundle'
 Bundle 'Align'
 Bundle 'jiangmiao/auto-pairs'
 Bundle 'bufexplorer.zip'
-Bundle 'ccvext.vim'
+"Bundle 'ccvext.vim'
 Bundle 'cSyntaxAfter'
 Bundle 'ctrlpvim/ctrlp.vim'
 Bundle 'mattn/emmet-vim'
@@ -152,7 +152,17 @@ Bundle 'taglist.vim'
 Bundle 'TxtBrowser'
 Bundle 'ZoomWin'
 Bundle 'OrangeT/vim-csharp'
-Bundle "pangloss/vim-javascript"
+Bundle 'godlygeek/tabular'
+Bundle 'plasticboy/vim-markdown'
+Bundle 'tpope/vim-dispatch'
+Bundle 'moll/vim-node'
+Bundle 'maksimr/vim-jsbeautify'
+Bundle 'vim-airline/vim-airline'
+Bundle 'pangloss/vim-javascript'
+
+".vimrc
+map <c-f> :call JsBeautify()<cr>
+let $TMP="f:/vimtmp"
 
 " -----------------------------------------------------------------------------
 "  < 编码配置 >
@@ -187,9 +197,11 @@ set tabstop=4                                         "设置Tab键的宽度，�
 set shiftwidth=4                                      "换行时自动缩进宽度，可更改（宽度同tabstop）
 set smarttab                                          "指定按一次backspace就删除shiftwidth宽度
 set foldenable                                        "启用折叠
-set foldmethod=indent                                 "indent 折叠方式
+"set foldmethod=indent                                 "indent 折叠方式
 " set foldmethod=marker                                "marker 折叠方式
-"set foldmethod=manual
+set foldmethod=manual
+
+
 
 " 常规模式下用空格键来开关光标行所在折叠（注：zR 展开所有折叠，zM 关闭所有折叠）
 nnoremap <space> @=((foldclosed(line('.')) < 0) ? 'zc' : 'zo')<CR>
@@ -229,7 +241,7 @@ set number                                            "显示行号
 set laststatus=2                                      "启用状态栏信息
 set cmdheight=2                                       "设置命令行的高度为2，默认为1
 set cursorline                                        "突出显示当前行
-set guifont=YaHei_Consolas_Hybrid:h10                 "设置字体:字号（字体名称空格用下划线代替）
+set guifont=hack\ 10               "设置字体:字号（字体名称空格用下划线代替）
 "set nowrap                                            "设置不自动换行
 set shortmess=atI                                     "去掉欢迎界面
 
@@ -240,11 +252,12 @@ if g:isGUI
     set lines=38 columns=120                          "指定窗口大小，lines为高度，columns为宽度
 endif
 
+set background=dark
 " 设置代码配色方案
 if g:isGUI
-    colorscheme solarized             "Gvim配色方案
+    colorscheme ir_black                  "Gvim配色方案
 else
-    colorscheme Tomorrow-Night-Eighties               "终端配色方案
+    colorscheme ir_black               "终端配色方案
 endif
 
 " 显示/隐藏菜单栏、工具栏、滚动条，可用 Ctrl + F11 切换
@@ -270,7 +283,7 @@ endif
 " -----------------------------------------------------------------------------
 set writebackup                             "保存文件前建立备份，保存成功后删除该备份
 set nobackup                                "设置无备份文件
-" set noswapfile                              "设置无临时文件
+set noswapfile                              "设置无临时文件
 " set vb t_vb=                                "关闭提示音
 
 
@@ -432,6 +445,16 @@ nmap <F3> :SrcExplToggle<CR>                "打开/闭浏览窗口
 "  < Syntastic 插件配置 >
 " -----------------------------------------------------------------------------
 " 用于保存文件时查检语法
+set statusline+=%#warningmsg#
+set statusline+=%{SyntasticStatuslineFlag()}
+set statusline+=%*
+
+let g:syntastic_always_populate_loc_list = 1
+let g:syntastic_auto_loc_list = 1
+let g:syntastic_check_on_open = 1
+let g:syntastic_check_on_wq = 0
+let g:syntastic_javascript_checkers = ['jshint']
+
 
 " -----------------------------------------------------------------------------
 "  < Tagbar 插件配置 >
@@ -480,31 +503,7 @@ au BufRead,BufNewFile *.txt setlocal ft=txt
 "  < cscope 工具配置 >
 " -----------------------------------------------------------------------------
 " 用Cscope自己的话说 - "你可以把它当做是超过频的ctags"
-if has("cscope")
-    "设定可以使用 quickfix 窗口来查看 cscope 结果
-    set cscopequickfix=s-,c-,d-,i-,t-,e-
-    "使支持用 Ctrl+]  和 Ctrl+t 快捷键在代码间跳转
-    set cscopetag
-    "如果你想反向搜索顺序设置为1
-    set csto=0
-    "在当前目录中添加任何数据库
-    if filereadable("cscope.out")
-        cs add cscope.out
-    "否则添加数据库环境中所指出的
-    elseif $CSCOPE_DB != ""
-        cs add $CSCOPE_DB
-    endif
-    set cscopeverbose
-    "快捷键设置
-    nmap <C-\>s :cs find s <C-R>=expand("<cword>")<CR><CR>
-    nmap <C-\>g :cs find g <C-R>=expand("<cword>")<CR><CR>
-    nmap <C-\>c :cs find c <C-R>=expand("<cword>")<CR><CR>
-    nmap <C-\>t :cs find t <C-R>=expand("<cword>")<CR><CR>
-    nmap <C-\>e :cs find e <C-R>=expand("<cword>")<CR><CR>
-    nmap <C-\>f :cs find f <C-R>=expand("<cfile>")<CR><CR>
-    nmap <C-\>i :cs find i ^<C-R>=expand("<cfile>")<CR>$<CR>
-    nmap <C-\>d :cs find d <C-R>=expand("<cword>")<CR><CR>
-endif
+
 
 " -----------------------------------------------------------------------------
 "  < ctags 工具配置 >
@@ -512,6 +511,7 @@ endif
 " 对浏览代码非常的方便,可以在函数,变量之间跳转等
 set tags=./tags;                            "向上级目录递归查找tags文件（好像只有在Windows下才有用）
 
+let g:vim_tags_auto_generate=1
 " -----------------------------------------------------------------------------
 "  < gvimfullscreen 工具配置 > 请确保已安装了工具
 " -----------------------------------------------------------------------------
